@@ -17,4 +17,4 @@ app.set("view engine", "ejs"); // npm install ejs to install
 
 app.use("/", router);
 
-app.listen(3000);
+module.exports = app;
