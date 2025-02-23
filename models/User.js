@@ -1,5 +1,6 @@
-const usersCollection = require("../db").collection("Users");
+const usersCollection = require("../db").db().collection("Users");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
 let User = function (data) {
   this.data = data; // we are storing the data we got from the data parameter and storing it in a property we can access later
@@ -50,8 +51,8 @@ User.prototype.validate = function () {
     this.errors.push("Password must be atleast 12 characters");
   }
 
-  if (this.data.password.length > 100) {
-    this.errors.push("Password cannot exceed 100 characters.");
+  if (this.data.password.length > 50) {
+    this.errors.push("Password cannot exceed 50 characters.");
   }
 
   if (this.data.username.length > 0 && this.data.username.length < 3) {
@@ -63,6 +64,27 @@ User.prototype.validate = function () {
   }
 };
 
+User.prototype.login = function () {
+  // very important to use an arrow function here as it does not manipulate the this keyword!!!!
+  return new Promise(async (resolve, reject) => {
+    this.cleanUp();
+    const attemptedUser = await usersCollection.findOne({
+      username: this.data.username,
+    });
+    if (
+      attemptedUser &&
+      bcrypt.compareSync(this.data.password, attemptedUser.password)
+    ) {
+      // this.data.password will be compared to the hashed value that is in the database\
+      // hashed value is attemptedUser.password
+
+      resolve("Congrats");
+    } else {
+      reject("Invalid username/password");
+    }
+  });
+};
+
 User.prototype.register = function () {
   // Step #1: Validate user data
   this.cleanUp();
@@ -70,6 +92,9 @@ User.prototype.register = function () {
 
   // step #2: Only if there are no validations errors, save the user data in the data base
   if (!this.errors.lenght) {
+    // hash user password
+    let salt = bcrypt.genSaltSync(10);
+    this.data.password = bcrypt.hashSync(this.data.password, salt);
     usersCollection.insertOne(this.data);
   }
 }; // a prototype, js will not need to create a copy once for each new object, all objects will have access to this method
