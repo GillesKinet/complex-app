@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
+const flash = require("connect-flash");
 const app = express();
 const router = require("./router.js");
 
@@ -15,6 +16,7 @@ let sessionOptions = session({
 
 // use sessions
 app.use(sessionOptions);
+app.use(flash());
 
 // boilerplate code, tells express to add users submitted data to route
 app.use(express.urlencoded({ extended: false })); // HTML form submit

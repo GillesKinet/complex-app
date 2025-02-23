@@ -8,6 +8,8 @@ router.post("/register", userController.register);
 
 router.post("/login", userController.login);
 
+router.post("/logout", userController.logout);
+
 router.get("/about", function (req, res) {
   res.send("This is our about page");
 });
