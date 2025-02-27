@@ -41,7 +41,7 @@ Post.prototype.cleanUp = function () {
   this.data = {
     title: this.data.title.trim(),
     body: this.data.body.trim(),
-    createdData: new Date(),
+    createdDate: new Date(), //
     author: ObjectID(this.userid),
   };
 };
@@ -53,6 +53,23 @@ Post.prototype.validate = function () {
   if (this.data.body == "") {
     this.errors.push("You must provide a body.");
   }
+};
+
+Post.findSingleById = function (id) {
+  //
+  return new Promise(async function (resolve, reject) {
+    if (typeof id != "string" || !ObjectID.isValid(id)) {
+      //!!! type of very import to not allow an injection attack, a user could send an object here for example
+      reject();
+      return; // this return is added to prevent any further execution of the function
+    }
+    let post = await postsCollection.findOne({ _id: new ObjectID(id) }); // here we get the ID of the post!
+    if (post) {
+      resolve(post);
+    } else {
+      reject();
+    }
+  });
 };
 
 module.exports = Post;
