@@ -18,6 +18,13 @@ let sessionOptions = session({
 app.use(sessionOptions);
 app.use(flash());
 
+app.use(function (req, res, next) {
+  res.locals.user = req.session.user; //object that will be available within ejs templates so its no longer needed in the controllers
+  // example home-dashboard.ejs file at line 5
+  // example header.ejs on line 20
+  next();
+});
+
 // boilerplate code, tells express to add users submitted data to route
 app.use(express.urlencoded({ extended: false })); // HTML form submit
 app.use(express.json()); // json data
