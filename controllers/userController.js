@@ -5,7 +5,11 @@ exports.login = function (req, res) {
   user
     .login()
     .then(function (result) {
-      req.session.user = { avatar: user.avatar, username: user.data.username }; // request object with session object, unique per user
+      req.session.user = {
+        avatar: user.avatar,
+        username: user.data.username,
+        _id: user.data._id,
+      }; // request object with session object, unique per user
       req.session.save(function () {
         res.redirect("/");
       });
@@ -43,7 +47,11 @@ exports.register = function (req, res) {
   user
     .register()
     .then(() => {
-      req.session.user = { avatar: user.avatar, username: user.data.username };
+      req.session.user = {
+        avatar: user.avatar,
+        username: user.data.username,
+        _id: user.data._id,
+      };
       req.session.save(function () {
         res.redirect("/");
       });

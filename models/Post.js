@@ -1,8 +1,10 @@
 const postsCollection = require("../db").db().collection("post"); //this file exports the mongo db client
+const ObjectID = require("mongodb").ObjectId;
 
-let Post = function (data) {
+let Post = function (data, userid) {
   this.data = data;
   this.errors = [];
+  this.userid = userid;
 };
 
 Post.prototype.create = function () {
@@ -35,12 +37,12 @@ Post.prototype.cleanUp = function () {
   if (typeof this.data.body != "string") {
     this.data.title = "";
   }
-
   // get rid of any bogus properties that a user would want to add on the object
   this.data = {
     title: this.data.title.trim(),
     body: this.data.body.trim(),
     createdData: new Date(),
+    author: ObjectID(this.userid),
   };
 };
 
