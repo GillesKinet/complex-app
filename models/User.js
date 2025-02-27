@@ -1,6 +1,7 @@
 const usersCollection = require("../db").db().collection("Users");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const md5 = require("md5");
 
 let User = function (data) {
   this.data = data; // we are storing the data we got from the data parameter and storing it in a property we can access later
@@ -103,7 +104,8 @@ User.prototype.login = function () {
     ) {
       // this.data.password will be compared to the hashed value that is in the database\
       // hashed value is attemptedUser.password
-
+      this.data = attemptedUser;
+      this.getAvatar();
       resolve("Congrats");
     } else {
       reject("Invalid username/password");
@@ -124,11 +126,16 @@ User.prototype.register = function () {
       let salt = bcrypt.genSaltSync(10);
       this.data.password = bcrypt.hashSync(this.data.password, salt);
       usersCollection.insertOne(this.data);
+      this.getAvatar();
       resolve();
     } else {
       reject(this.errors);
     }
   });
 }; // a prototype, js will not need to create a copy once for each new object, all objects will have access to this method
+
+User.prototype.getAvatar = function () {
+  this.avatar = `https://s.gravatar.com/avatar/${md5(this.data.email)}?s=128`;
+};
 
 module.exports = User;

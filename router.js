@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("./controllers/userController");
+const postController = require("./controllers/postController");
+
+// user related routes
 
 router.get("/", userController.home);
 
@@ -13,5 +16,13 @@ router.post("/logout", userController.logout);
 router.get("/about", function (req, res) {
   res.send("This is our about page");
 });
+
+// post related routes
+
+router.get(
+  "/create-post",
+  userController.mustBeLoggedIn,
+  postController.viewCreateScreen
+);
 
 module.exports = router;

@@ -5,7 +5,7 @@ exports.login = function (req, res) {
   user
     .login()
     .then(function (result) {
-      req.session.user = { username: user.data.username }; // request object with session object, unique per user
+      req.session.user = { avatar: user.avatar, username: user.data.username }; // request object with session object, unique per user
       req.session.save(function () {
         res.redirect("/");
       });
@@ -20,6 +20,17 @@ exports.login = function (req, res) {
   // catch takes care of reject
 };
 
+exports.mustBeLoggedIn = function (req, res, next) {
+  if (req.session.user) {
+    next();
+  } else {
+    req.flash("errors", "You must be logged in to perform that action.");
+    req.session.save(function () {
+      res.redirect("/");
+    });
+  }
+};
+
 exports.logout = function (req, res) {
   req.session.destroy(function () {
     res.redirect("/"); // redirects to homepage
@@ -32,9 +43,7 @@ exports.register = function (req, res) {
   user
     .register()
     .then(() => {
-      req.session.user = {
-        username: user.data.username,
-      };
+      req.session.user = { avatar: user.avatar, username: user.data.username };
       req.session.save(function () {
         res.redirect("/");
       });
@@ -51,7 +60,10 @@ exports.register = function (req, res) {
 
 exports.home = function (req, res) {
   if (req.session.user) {
-    res.render("home-dashboard", { username: req.session.user.username });
+    res.render("home-dashboard", {
+      username: req.session.user.username,
+      avatar: req.session.user.avatar,
+    });
   } else {
     res.render("home-guest", {
       errors: req.flash("errors"),
