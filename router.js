@@ -21,8 +21,14 @@ router.get("/about", function (req, res) {
 
 router.get(
   "/create-post",
-  userController.mustBeLoggedIn,
+  userController.mustBeLoggedIn, // to make sure the user is logged in to view the screen
   postController.viewCreateScreen
+);
+
+router.post(
+  "/create-post",
+  userController.mustBeLoggedIn,
+  postController.create
 );
 
 module.exports = router;
