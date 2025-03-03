@@ -3,9 +3,17 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const md5 = require("md5");
 
-let User = function (data) {
+let User = function (data, getAvatar) {
   this.data = data; // we are storing the data we got from the data parameter and storing it in a property we can access later
   this.errors = [];
+  if (getAvatar == undefined) {
+    {
+      getAvatar = false;
+    }
+  }
+  if (getAvatar) {
+    this.getAvatar();
+  }
 };
 
 // the function below is so people dont add arrays or objects to the corresponding fields
