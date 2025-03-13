@@ -17,6 +17,14 @@ router.get("/about", function (req, res) {
   res.send("This is our about page");
 });
 
+// profile related routes
+
+router.get(
+  "/profile/:username",
+  userController.ifUserExists,
+  userController.profilePostsScreen
+);
+
 // post related routes
 
 router.get(

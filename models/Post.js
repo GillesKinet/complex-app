@@ -99,12 +99,13 @@ Post.findSingleById = function (id) {
     });
 
     if (posts.length) {
-      console.log(posts[0]);
       resolve(posts[0]); // return first item in array
     } else {
       reject();
     }
   });
 };
+
+Post.findByAuthorId = function (authorId) {};
 
 module.exports = Post;
