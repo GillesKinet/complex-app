@@ -19,6 +19,10 @@ app.use(sessionOptions);
 app.use(flash());
 
 app.use(function (req, res, next) {
+  // make all error and success flash messages available from all templates
+  res.locals.errors = req.flash("errors");
+  res.locals.success = req.flash("success");
+
   res.locals.user = req.session.user; //object that will be available within ejs templates so its no longer needed in the controllers
   // example home-dashboard.ejs file at line 5
   // example header.ejs on line 20
