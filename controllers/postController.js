@@ -60,10 +60,7 @@ exports.edit = function (req, res) {
     .catch(() => {
       // post with the request id doesn't exist
       // current visitor is not the owner of the requested post
-      req.flash(
-        "errors",
-        "You do not have permmission to perrform taht action."
-      );
+      req.flash("errors", "You do not have permission to perform that action.");
       req.session.save(function () {
         res.redirect("/");
       });
