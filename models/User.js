@@ -158,7 +158,7 @@ User.findByUsername = function (username) {
         if (userDoc) {
           userDoc = new User(userDoc, true); // here we create a a new user document based on the data we get from the db
           userDoc = {
-            _id: userDoc.data.id,
+            _id: userDoc.data._id,
             username: userDoc.data.username,
             avatar: userDoc.avatar,
           };

@@ -56,7 +56,46 @@ Post.prototype.validate = function () {
   }
 };
 
-Post.findSingleById = function (id) {
+Post.reusablePostQuery = function (uniqueOperations, visitorId) {
+  //
+  return new Promise(async function (resolve, reject) {
+    let aggOperations = uniqueOperations.concat([
+      {
+        $lookup: {
+          from: "Users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorDocument",
+        }, // look in users collection for the author field
+      },
+      {
+        $project: {
+          // allows which fields resulting object should have - so you dont get them all
+          title: 1, // 1 = true
+          body: 1,
+          createdDate: 1,
+          authorId: "$author",
+          author: { $arrayElemAt: ["$authorDocument", 0] }, // returns first item in the array provided by $lookup
+        },
+      },
+    ]); // returns a new array
+
+    let posts = await postsCollection.aggregate(aggOperations).toArray(); // use aggregates when you need to perform multiple actions e.g get the id of the post and get the id of the author
+
+    // clean up author property in each post object
+    posts = posts.map(function (post) {
+      post.isVisitorOwner = post.authorId.equals(visitorId);
+      post.author = {
+        username: post.author.username,
+        avatar: new User(post.author, true).avatar,
+      };
+      return post;
+    });
+    resolve(posts);
+  });
+};
+
+Post.findSingleById = function (id, visitorId) {
   //
   return new Promise(async function (resolve, reject) {
     if (typeof id != "string" || !ObjectID.isValid(id)) {
@@ -64,39 +103,15 @@ Post.findSingleById = function (id) {
       reject();
       return; // this return is added to prevent any further execution of the function
     }
-    let posts = await postsCollection
-      .aggregate([
+
+    let posts = await Post.reusablePostQuery(
+      [
         {
           $match: { _id: new ObjectID(id) },
         },
-        {
-          $lookup: {
-            from: "Users",
-            localField: "author",
-            foreignField: "_id",
-            as: "authorDocument",
-          }, // look in users collection for the author field
-        },
-        {
-          $project: {
-            // allows which fields resulting object should have - so you dont get them all
-            title: 1, // 1 = true
-            body: 1,
-            createdDate: 1,
-            author: { $arrayElemAt: ["$authorDocument", 0] }, // returns first item in the array provided by $lookup
-          },
-        },
-      ])
-      .toArray(); // use aggregates when you need to perform multiple actions e.g get the id of the post and get the id of the author
-
-    // clean up author property in each post object
-    posts = posts.map(function (post) {
-      post.author = {
-        username: post.author.username,
-        avatar: new User(post.author, true).avatar,
-      };
-      return post;
-    });
+      ],
+      visitorId
+    );
 
     if (posts.length) {
       resolve(posts[0]); // return first item in array
@@ -106,6 +121,19 @@ Post.findSingleById = function (id) {
   });
 };
 
-Post.findByAuthorId = function (authorId) {};
+Post.findByAuthorId = function (authorId) {
+  return Post.reusablePostQuery([
+    {
+      $match: {
+        author: authorId,
+      },
+    },
+    {
+      $sort: {
+        createdDate: -1, // 1 for ascending -1 for descending
+      },
+    },
+  ]);
+};
 
 module.exports = Post;

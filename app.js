@@ -22,6 +22,12 @@ app.use(function (req, res, next) {
   res.locals.user = req.session.user; //object that will be available within ejs templates so its no longer needed in the controllers
   // example home-dashboard.ejs file at line 5
   // example header.ejs on line 20
+  // make current user id avialable on the req object
+  req.session.user
+    ? (req.visitorId = req.session.user._id)
+    : (req.visitorId = 0);
+
+  // make user session data available frorm within view templates
   next();
 });
 
