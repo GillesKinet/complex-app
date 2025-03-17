@@ -52,4 +52,10 @@ router.post(
   postController.edit
 );
 
+router.post(
+  "/post/:id/delete",
+  userController.mustBeLoggedIn,
+  postController.delete
+);
+
 module.exports = router;
