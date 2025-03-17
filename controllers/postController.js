@@ -8,18 +8,29 @@ exports.create = function (req, res) {
   let post = new Post(req.body, req.session.user._id);
   post
     .create()
-    .then(function () {
-      res.send("New post created");
+    .then(function (newId) {
+      // newId comes from the Post.create function in the resolve statement info.insertedId)
+      req.flash("success", "New post successfully created.");
+      req.session.save(() => res.redirect(`/post/${newId}`));
     })
     .catch(function (errors) {
-      res.send(errors);
+      errors.forEach((error) => {
+        req.flash("errors", error);
+      });
+      req.session.save(() => res.redirect("/create-post"));
     });
 };
 
 exports.viewSingle = async function (req, res) {
   try {
     let post = await Post.findSingleById(req.params.id, req.visitorId);
-    res.render("single-post-screen", { post: post });
+
+    if (post.authorId == req.visitorId) {
+      res.render("single-post-screen", { post: post });
+    } else {
+      req.flash("errors", "You do not have permission to perform that action.");
+      req.session.save(() => res.redirect("/"));
+    }
   } catch {
     res.render("404");
   }
