@@ -1,4 +1,5 @@
 import axios from "axios";
+import DOMpurify from "dompurify";
 
 export default class Search {
   // 1. Select DOM elements and keep track of any usefull data
@@ -61,7 +62,8 @@ export default class Search {
 
   renderResultsHTML(posts) {
     if (posts.length) {
-      this.resultArea.innerHTML = ` <div class="list-group shadow-sm">
+      this.resultArea.innerHTML =
+        DOMpurify.sanitize(`<div class="list-group shadow-sm">
             <div class="list-group-item active"><strong>Search Results</strong> (${
               posts.length > 1 ? `${posts.length} items found` : `1 item found`
             })</div>
@@ -74,14 +76,16 @@ ${posts
               <img class="avatar-tiny" src="${post.author.avatar}"> <strong>${
       post.title
     }</strong>
-              <span class="text-muted small">by ${
-                post.author.username
-              } on ${postDate.getMonth()}/${postDate.getDate()}/${postDate.getFullYear()}</span>
+             <span class="text-muted small">by ${post.author.username} on ${
+      postDate.getMonth() + 1
+    }/${postDate.getDate()}/${postDate.getFullYear()}</span>
+
+ 
             </a>`;
   })
   .join("")}
             
-          </div>`;
+          </div>`);
     } else {
       this.resultArea.innerHTML = `<p class="alert alert-danger text-center shadow-sm">Sorry, we could not find any posts matching that text.</p>`;
     }
