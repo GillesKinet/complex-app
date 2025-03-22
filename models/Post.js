@@ -98,29 +98,35 @@ Post.prototype.validate = function () {
   }
 };
 
-Post.reusablePostQuery = function (uniqueOperations, visitorId) {
+Post.reusablePostQuery = function (
+  uniqueOperations,
+  visitorId,
+  finalOperations = []
+) {
   //
   return new Promise(async function (resolve, reject) {
-    let aggOperations = uniqueOperations.concat([
-      {
-        $lookup: {
-          from: "Users",
-          localField: "author",
-          foreignField: "_id",
-          as: "authorDocument",
-        }, // look in users collection for the author field
-      },
-      {
-        $project: {
-          // allows which fields resulting object should have - so you dont get them all
-          title: 1, // 1 = true
-          body: 1,
-          createdDate: 1,
-          authorId: "$author",
-          author: { $arrayElemAt: ["$authorDocument", 0] }, // returns first item in the array provided by $lookup
+    let aggOperations = uniqueOperations
+      .concat([
+        {
+          $lookup: {
+            from: "Users",
+            localField: "author",
+            foreignField: "_id",
+            as: "authorDocument",
+          }, // look in users collection for the author field
         },
-      },
-    ]); // returns a new array
+        {
+          $project: {
+            // allows which fields resulting object should have - so you dont get them all
+            title: 1, // 1 = true
+            body: 1,
+            createdDate: 1,
+            authorId: "$author",
+            author: { $arrayElemAt: ["$authorDocument", 0] }, // returns first item in the array provided by $lookup
+          },
+        },
+      ])
+      .concat(finalOperations); // returns a new array
 
     let posts = await postsCollection.aggregate(aggOperations).toArray(); // use aggregates when you need to perform multiple actions e.g get the id of the post and get the id of the author
 
@@ -189,6 +195,21 @@ Post.delete = function (postIdToDelete, currentUserId) {
         reject();
       }
     } catch {
+      reject();
+    }
+  });
+};
+
+Post.search = function (searchTerm) {
+  return new Promise(async (resolve, reject) => {
+    if (typeof searchTerm === "string") {
+      let posts = await Post.reusablePostQuery(
+        [{ $match: { $text: { $search: searchTerm } } }],
+        undefined,
+        [{ $sort: { score: { $meta: "textScore" } } }]
+      );
+      resolve(posts);
+    } else {
       reject();
     }
   });
