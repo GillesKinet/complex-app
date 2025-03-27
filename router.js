@@ -70,4 +70,10 @@ router.post(
   followController.addFollow
 );
 
+router.post(
+  "/removeFollow/:username",
+  userController.mustBeLoggedIn,
+  followController.removeFollow
+);
+
 module.exports = router;
