@@ -23,6 +23,7 @@ router.get("/about", function (req, res) {
 router.get(
   "/profile/:username",
   userController.ifUserExists,
+  userController.sharedProfileData,
   userController.profilePostsScreen
 );
 
