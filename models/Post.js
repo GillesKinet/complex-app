@@ -2,6 +2,7 @@ const postsCollection = require("../db").db().collection("post"); //this file ex
 const ObjectID = require("mongodb").ObjectId;
 const User = require("../models/User");
 const sanitizeHTML = require("sanitize-html");
+const followsCollection = require("../db").db().collection("follows"); //this file exports the mongo db client
 
 let Post = function (data, userid, requestedPostId) {
   this.data = data;
@@ -129,7 +130,6 @@ Post.reusablePostQuery = function (
       .concat(finalOperations); // returns a new array
 
     let posts = await postsCollection.aggregate(aggOperations).toArray(); // use aggregates when you need to perform multiple actions e.g get the id of the post and get the id of the author
-
     // clean up author property in each post object
     posts = posts.map(function (post) {
       post.isVisitorOwner = post.authorId.equals(visitorId);
@@ -221,6 +221,22 @@ Post.countPostsByAuthor = function (id) {
     let postCount = await postsCollection.countDocuments({ author: id });
     resolve(postCount);
   });
+};
+
+Post.getFeed = async function (id) {
+  // create array of the user ids that the current user follows
+  let followedUsers = await followsCollection
+    .find({ authorId: new ObjectID(id) })
+    .toArray();
+
+  followedUsers = followedUsers.map(function (followDoc) {
+    return followDoc.followedId;
+  });
+  // look for posts where the author is in the above array of followed users
+  return Post.reusablePostQuery([
+    { $match: { author: { $in: followedUsers } } },
+    { $sort: { createdDate: -1 } },
+  ]);
 };
 
 module.exports = Post;
