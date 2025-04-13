@@ -87,9 +87,16 @@ io.on("connection", function (socket) {
   if (socket.request.session.user) {
     // check is uers is logged in
     let user = socket.request.session.user;
+
+    socket.emit("welcome", { username: user.username, avatar: user.avatar });
+
     socket.on("chatMessageFromBrowser", function (data) {
-      io.emit("chatMessageFromServer", {
-        message: data.message,
+      socket.broadcast.emit("chatMessageFromServer", {
+        // this will emit to any and all connections except the socket that send the mesage in the first place
+        message: sanitizeHTML(data.message, {
+          allowedTags: [],
+          allowedAttributes: {},
+        }),
         username: user.username,
         avatar: user.avatar,
       });
