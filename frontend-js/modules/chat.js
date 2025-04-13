@@ -4,6 +4,7 @@ export default class Chat {
     this.chatWrapper = document.querySelector("#chat-wrapper");
     this.openIcon = document.querySelector(".header-chat-icon");
     this.injectHTML();
+    this.chatLog = document.querySelector("#chat");
     this.chatField = document.querySelector("#chatField");
     this.chatForm = document.querySelector("#chatForm");
     this.closeIcon = document.querySelector(".chat-title-bar-close"); // it only exists after the injectHTML
@@ -44,9 +45,22 @@ export default class Chat {
 
   openConnection() {
     this.socket = io();
-    this.socket.on("chatMessageFromServer", function (data) {
-      alert(data.message);
+    this.socket.on("chatMessageFromServer", (data) => {
+      this.displayMessageFromServer(data);
     });
+  }
+
+  displayMessageFromServer(data) {
+    this.chatLog.insertAdjacentHTML(
+      "beforeend",
+      `<div class="chat-other">
+        <a href="#"><img class="avatar-tiny" src="${data.avatar}"></a>
+        <div class="chat-message"><div class="chat-message-inner">
+          <a href="#"><strong>${data.username}:</strong></a>
+         ${data.message}
+        </div></div>
+      </div>`
+    );
   }
 
   injectHTML() {
