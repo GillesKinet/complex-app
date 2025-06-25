@@ -22,7 +22,6 @@ export default class Search {
     this.closeIcon.addEventListener("click", () => this.closeOverlay());
     this.headerSearchIcon.addEventListener("click", (e) => {
       e.preventDefault();
-
       this.openOverlay();
     }); // use arrow function so this keyword isn't changed
   }
