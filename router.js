@@ -18,6 +18,10 @@ router.get("/about", function (req, res) {
   res.send("This is our about page");
 });
 
+router.post("/doesUsernameExist", userController.doesUsernameExist);
+
+router.post("/doesEmailExist", userController.doesEmailExist);
+
 // profile related routes
 
 router.get(
