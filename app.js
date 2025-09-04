@@ -4,8 +4,14 @@ const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const markdown = require("marked");
 const app = express();
+
 const router = require("./router.js");
 const sanitizeHTML = require("sanitize-html");
+
+app.use(express.urlencoded({ extended: false })); // HTML form submit
+app.use(express.json()); // json data
+
+app.use("/api", require("./router-api"));
 
 let sessionOptions = session({
   secret: "Javascript is so cool",
@@ -62,8 +68,6 @@ app.use(function (req, res, next) {
 });
 
 // boilerplate code, tells express to add users submitted data to route
-app.use(express.urlencoded({ extended: false })); // HTML form submit
-app.use(express.json()); // json data
 
 // here we are going to use css
 app.use(express.static("public"));

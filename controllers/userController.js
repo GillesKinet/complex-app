@@ -200,3 +200,15 @@ exports.doesEmailExist = async function (req, res) {
   let emailBool = await User.doesEmailExist(req.body.email);
   res.json(emailBool);
 };
+
+exports.apiLogin = function (req, res) {
+  let user = new User(req.body);
+  user
+    .login()
+    .then(function (result) {
+      res.json("Good job, that is a real username and password."); // request object with session object, unique per user
+    })
+    .catch(function (err) {
+      res.json("Sorry your values are not correct");
+    });
+};
