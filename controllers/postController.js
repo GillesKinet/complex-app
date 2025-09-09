@@ -108,3 +108,15 @@ exports.search = function (req, res) {
       res.json([]);
     });
 };
+
+exports.apiCreatePost = function (req, res) {
+  let post = new Post(req.body, req.apiUser._id);
+  post
+    .create()
+    .then(function (newId) {
+      res.json("Post successfully created.");
+    })
+    .catch(function (errors) {
+      res.json(errors);
+    });
+};

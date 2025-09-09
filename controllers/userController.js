@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Post = require("../models/Post");
 const Follow = require("../models/Follow");
+const jwt = require("jsonwebtoken");
 
 exports.sharedProfileData = async function (req, res, next) {
   let isVisitorsProfile = false;
@@ -206,9 +207,22 @@ exports.apiLogin = function (req, res) {
   user
     .login()
     .then(function (result) {
-      res.json("Good job, that is a real username and password."); // request object with session object, unique per user
+      res.json(
+        jwt.sign({ _id: user.data._id }, process.env.JWTSECRET, {
+          expiresIn: "2h",
+        })
+      );
     })
     .catch(function (err) {
       res.json("Sorry your values are not correct");
     });
+};
+
+exports.apiMustBeloggedIn = function (req, res, next) {
+  try {
+    req.apiUser = jwt.verify(req.body.token, process.env.JWTSECRET);
+    next();
+  } catch {
+    res.json("Sorry you must provide a valid token.");
+  }
 };
