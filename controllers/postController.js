@@ -1,4 +1,6 @@
 const Post = require("../models/Post");
+const sendgrid = require("@sendgrid/mail");
+sendgrid.setApiKey(process.env.SENDGRIDAPIKEY);
 
 exports.viewCreateScreen = function (req, res) {
   res.render("create-post");
@@ -9,6 +11,20 @@ exports.create = function (req, res) {
   post
     .create()
     .then(function (newId) {
+      sendgrid
+        .send({
+          to: "testemailhyperkinet@mailinator.com",
+          from: "testemailhyperkinet@mailinator.com",
+          subject: "Congrats on creating a new post",
+          text: "You did it great job at creating a post",
+          html: "You did it <bold>great</bold> job at creating a post",
+        })
+        .then(function () {
+          console.log("succesfull");
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       // newId comes from the Post.create function in the resolve statement info.insertedId)
       req.flash("success", "New post successfully created.");
       req.session.save(() => res.redirect(`/post/${newId}`));
