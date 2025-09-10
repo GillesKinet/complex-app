@@ -11,27 +11,23 @@ let Post = function (data, userid, requestedPostId) {
   this.requestedPostId = requestedPostId;
 };
 
-Post.prototype.create = function () {
-  return new Promise((resolve, reject) => {
-    this.cleanUp();
-    this.validate();
-    if (!this.errors.length) {
-      // save post into database since
-      postsCollection
-        .insertOne(this.data)
-        .then((info) => {
-          resolve(info.insertedId);
-        })
-        .catch(() => {
-          this.errors.push(
-            "Please try again later, there might be an issue with the Mongo db sever"
-          );
-          reject(this.errors);
-        });
-    } else {
-      reject(this.errors);
+Post.prototype.create = async function () {
+  this.cleanUp();
+  this.validate();
+  if (!this.errors.length) {
+    // save post into database
+    try {
+      const info = await postsCollection.insertOne(this.data);
+      return info.insertedId;
+    } catch (error) {
+      this.errors.push(
+        "Please try again later, there might be an issue with the Mongo db sever"
+      );
+      throw this.errors;
     }
-  });
+  } else {
+    throw this.errors;
+  }
 };
 
 Post.prototype.update = function () {
